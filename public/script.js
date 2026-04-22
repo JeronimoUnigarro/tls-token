@@ -1,12 +1,30 @@
-let miToken = "";
+let miToken = localStorage.getItem('token') || "";
 const displayResultado = document.getElementById('resultado');
+
+function obtenerCredenciales() {
+    const userVal = document.getElementById('username').value.trim();
+    const passVal = document.getElementById('password').value;
+
+    if (!userVal || !passVal) {
+        mostrarResultado("⚠️ Completa usuario y contraseña.", "#dc3545", "#f8d7da");
+        return null;
+    }
+
+    return { userVal, passVal };
+}
+
+function mostrarResultado(mensaje, color = "#333", fondo = "#e9ecef") {
+    displayResultado.innerText = mensaje;
+    displayResultado.style.color = color;
+    displayResultado.parentElement.style.backgroundColor = fondo;
+}
 
 // Función para Login
 async function login() {
-    // 1. Obtener valores de los inputs
-    const userVal = document.getElementById('username').value;
-    const passVal = document.getElementById('password').value;
-    const displayResultado = document.getElementById('resultado');
+    const credenciales = obtenerCredenciales();
+    if (!credenciales) return;
+
+    const { userVal, passVal } = credenciales;
 
     try {
         const res = await fetch('/api/login', {
@@ -19,11 +37,9 @@ async function login() {
         
         if (data.token) {
             // 2. Guardar token para futuras peticiones (2FA y Datos Secretos)
+            miToken = data.token;
             localStorage.setItem('token', data.token);
-            
-            displayResultado.innerText = "✅ ¡Login exitoso! Configure su 2FA para continuar.";
-            displayResultado.style.color = "#28a745";
-            displayResultado.parentElement.style.backgroundColor = "#d4edda";
+            mostrarResultado("✅ ¡Login exitoso! Configure su 2FA para continuar.", "#28a745", "#d4edda");
 
             // 3. MOSTRAR LA SECCIÓN DE 2FA
             const section2FA = document.getElementById('section-2fa');
@@ -32,21 +48,43 @@ async function login() {
             }
 
         } else {
-            displayResultado.innerText = `❌ Error: ${data.error || 'Credenciales inválidas'}`;
-            displayResultado.style.color = "#dc3545";
-            displayResultado.parentElement.style.backgroundColor = "#f8d7da";
+            mostrarResultado(`❌ Error: ${data.error || 'Credenciales inválidas'}`, "#dc3545", "#f8d7da");
         }
     } catch (error) {
-        displayResultado.innerText = "⚠️ Error de conexión con el servidor.";
-        displayResultado.style.color = "#dc3545";
+        mostrarResultado("⚠️ Error de conexión con el servidor.", "#dc3545", "#f8d7da");
+    }
+}
+
+// Función para Registro
+async function register() {
+    const credenciales = obtenerCredenciales();
+    if (!credenciales) return;
+
+    const { userVal, passVal } = credenciales;
+
+    try {
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: userVal, password: passVal })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            mostrarResultado("✅ Usuario registrado con éxito. Ahora puedes iniciar sesión.", "#28a745", "#d4edda");
+        } else {
+            mostrarResultado(`❌ Error: ${data.error || 'No se pudo registrar el usuario'}`, "#dc3545", "#f8d7da");
+        }
+    } catch (error) {
+        mostrarResultado("⚠️ Error de conexión con el servidor.", "#dc3545", "#f8d7da");
     }
 }
 
 // Función para ver el secreto
 async function verSecreto() {
     if (!miToken) {
-        displayResultado.innerText = " Error: Primero debes iniciar sesión.";
-        displayResultado.style.color = "#dc3545";
+        mostrarResultado("❌ Error: Primero debes iniciar sesión.", "#dc3545", "#f8d7da");
         return;
     }
 
@@ -56,13 +94,13 @@ async function verSecreto() {
         });
         
         const data = await res.json();
-        displayResultado.innerText = JSON.stringify(data, null, 2);
-        displayResultado.style.color = "#333";
+        mostrarResultado(JSON.stringify(data, null, 2));
     } catch (error) {
-        displayResultado.innerText = "⚠️ Error al obtener datos.";
+        mostrarResultado("⚠️ Error al obtener datos.", "#dc3545", "#f8d7da");
     }
 }
 
 // Asignación de eventos a los botones
 document.getElementById('btnLogin').addEventListener('click', login);
+document.getElementById('btnRegister').addEventListener('click', register);
 document.getElementById('btnSecret').addEventListener('click', verSecreto);

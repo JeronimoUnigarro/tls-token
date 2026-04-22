@@ -57,6 +57,15 @@ button {
     background-color: #003366; 
 }
 
+.btn-register {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-register:hover {
+    background-color: #218838;
+}
+
 .btn-secret {
     background-color: white;
     color: var(--primary-color);
