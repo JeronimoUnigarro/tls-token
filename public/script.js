@@ -45,7 +45,7 @@ async function login() {
 // Función para ver el secreto
 async function verSecreto() {
     if (!miToken) {
-        displayResultado.innerText = "🔒 Error: Primero debes iniciar sesión.";
+        displayResultado.innerText = " Error: Primero debes iniciar sesión.";
         displayResultado.style.color = "#dc3545";
         return;
     }
