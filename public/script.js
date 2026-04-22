@@ -39,7 +39,7 @@ async function login() {
             // 2. Guardar token para futuras peticiones (2FA y Datos Secretos)
             miToken = data.token;
             localStorage.setItem('token', data.token);
-            mostrarResultado("✅ ¡Login exitoso! Configure su 2FA para continuar.", "#28a745", "#d4edda");
+            mostrarResultado(" ¡Login exito Configure su 2FA para continuar.", "#28a745", "#d4edda");
 
             // 3. MOSTRAR LA SECCIÓN DE 2FA
             const section2FA = document.getElementById('section-2fa');
